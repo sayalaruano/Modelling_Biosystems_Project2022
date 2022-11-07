@@ -27,7 +27,7 @@ param.Diffc2=10; %c2 diffusion rate
 vD = -param.R*M2;
 
 % change in C1 over time
-vC1 = param.kDc1*D + param.KM1*M1 - param.dc1*C1;
+vC1 = param.kDc1*D + param.kM1*M1 - param.dc1*C1;
 
 % change in M0 over time
 m1 = (param.vmax1*M0)/(param.km1 + M0); %michaelis-menten equation rate for transformation from M0 to M1
@@ -38,7 +38,7 @@ vM1 = C1*m1*M0 - param.dM1*M0;
 % change in M2 over time
 vM2 = C2*m2*M0 - param.dM2*M0;
 % change in C2 over time
-
+vC2 = param.kM2*M2 - param.dc2*C2;
 % change in F over time
 vF = param.kf*F*(1-param.Fmax/F);
 
