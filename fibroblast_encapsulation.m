@@ -30,13 +30,13 @@ vD = -param.R*M2;
 vC1 = param.kDc1*D + param.KM1*M1 - param.dc1*C1;
 
 % change in M0 over time
-
+m1 = (param.vmax1*M0)/(param.km1 + M0); %michaelis-menten equation rate for transformation from M0 to M1
+m2 = (param.vmax2*M0)/(param.km2 + M0); %michaelis-menten equation rate for transformation from M0 to M2
+vM0 = D * param.k0 * (1 -(M0/param.Mmax)) - C1*m1*M0 - C2*m2*M0 - param.dM0*M0;
 % change in M1 over time
-m1 = (param.vmax1*M0)./(param.km1 + M0); %michaelis-menten equation rate
 vM1 = C1*m1*M0 - param.dM1*M0;
-
 % change in M2 over time
-
+vM2 = C2*m2*M0 - param.dM2*M0;
 % change in C2 over time
 
 % change in F over time
@@ -44,3 +44,7 @@ vF = param.kf*F*(1-param.Fmax/F);
 
 
 %% INITIAL CONDITION
+Debris: (10:50) %(10 - low), %(50 - high) 
+M0: 1
+C1: 0.1
+C2: 0.1 
