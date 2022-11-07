@@ -21,6 +21,9 @@ param.Fmax= 2; %maximal F
 param.df= 0.2; %F apoptosis rate
 param.Diffc1=10; %c1 diffusion rate
 param.Diffc2=10; %c2 diffusion rate
+param.hk = ; %hill type parameter k (migration rate constant)
+param.hn = ; %hill type parameter n (power)
+
 
 %% EQUATIONS % don't run this code
 % change in D over time
@@ -40,7 +43,7 @@ vM2 = C2*m2*M0 - param.dM2*M0;
 % change in C2 over time
 vC2 = param.kM2*M2 - param.dc2*C2;
 % change in F over time
-vF = param.kf*F*(1-param.Fmax/F);
+vF = param.kf*F*(1-F/param.Fmax) + (M1 / (param.hk + M))^param.hn - param.df*F;
 
 
 %% INITIAL CONDITION
