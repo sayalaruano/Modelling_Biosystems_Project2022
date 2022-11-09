@@ -21,8 +21,42 @@ param.Fmax= 2; %maximal F
 param.df= 0.2; %F apoptosis rate
 param.Diffc1=10; %c1 diffusion rate
 param.Diffc2=10; %c2 diffusion rate
-param.hk = ; %hill type parameter k (migration rate constant)
-param.hn = ; %hill type parameter n (power)
+
+%% Hill-type parameter estimation
+M1_obs = [0; 0.1; 0.3; 0.5;1; 1.9; 3; 3.4; 5; 7.5; 8; 9; 12; 20];
+F_obs = [0; 3.04E-11; 7.45E-09; 9.54E-08; 3.01E-06; 7.55E-05; 0.000738; 0.001362; 0.008706; 0.042005; 0.0499; 0.064312; 0.088364; 0.098986];
+hn = [1:0.1:10]; % arbitrary values adjusted based on the output of the figure
+hk = [0.1:0.01:1]; % k is a rate so it can only take values between 0 and 1
+
+% normalization step
+M1_obs = M1_obs/max(M1_obs);
+F_obs = F_obs/max(F_obs); 
+
+for i = 1:length(hn)
+    for j = 1 :length(hk)
+        hill = hill_eq(hk(j),hn(i),M1_obs);
+        RMSE(i, j) = sqrt(mean((F_obs - hill).^2));
+    end
+end
+
+
+min_RMSE = min(RMSE,[],'all');
+[x,y] = find(RMSE==min_RMSE);
+param.hk = hk(y); %hill type parameter k (migration rate constant)
+param.hn = hn(x); %hill type parameter n (power)
+
+X = linspace(0,1);
+hill_final = hill_eq(param.hk, param.hn,X);
+
+figure;
+hold on;
+plot(M1_obs, F_obs,'*');
+plot(X, hill_final);
+xlabel('[M1] (type 1 macrophage)')
+ylabel('[F] (fibroblast concentration)')
+hname = ['Fitted Hill Curve, k = ', num2str(param.hk), ', n = ',num2str(param.hn)];
+legend('Observations',hname,'Location','SouthEast')
+hold off;
 
 
 %% EQUATIONS % don't run this code
@@ -51,3 +85,8 @@ Debris: (10:50) %(10 - low), %(50 - high)
 M0: 1
 C1: 0.1
 C2: 0.1 
+
+%%
+function hill=hill_eq(k,n,C) % hill type function
+    hill = C.^n./(k^n + C.^n);
+end
