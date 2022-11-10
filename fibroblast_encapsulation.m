@@ -25,8 +25,6 @@ param.df= 0.2; %F apoptosis rate
 % antiinflammatory drug treatment option
 param.drug1 = 0.01; %arbitrary rates
 param.drug2 = 0.01; 
-param.drug1_max = 2; %something;
-param.drug2_max = 2; %something;
 param.kdrug1 = 0.01; %k for log growth; 
 param.kdrug2 = 0.01; %k for log growth; 
 
@@ -70,17 +68,17 @@ t0 = 0; tf = 2000;  %(s)
 
 % Set the initial conditions (nondimensional)
 %         D; C1; C2; M0; M1; M2; F; drug1; drug2
-x0_low = [10; 0.1; 0.1; 1; 0; 0; 0; 0; 0]; 
-x0_high = [50; 0.1; 0.1; 1; 0; 0; 0; 0; 0]; 
+x0_low = [10; 0.1; 0.1; 1; 0; 0; 0; 0.2; 0.2]; 
+x0_high = [50; 0.1; 0.1; 1; 0; 0; 0; 0.2; 0.2]; 
 
 % Solve the ODE system
-[T,X_low] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
+[T_low,X_low] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
 
 % Plot the ODE solution all together
 figure;
 hold on
 for i=1:length(x0_low)
-    plot(T,X_low(:,i));
+    plot(T_low,X_low(:,i));
 end  
 xlabel('time');
 title('Change in concentrations over time (initial debris concentration is low')
@@ -93,7 +91,7 @@ options = {[0 0.4470 0.7410], [1 0 0], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.
 for i=1:length(x0_low)
     if i < 7
         figure
-        plot(T,X_low(:,i),'Color', options{i});
+        plot(T_low,X_low(:,i),'Color', options{i});
         xlabel('time');
         legend(names(i),'Location','SouthEast');    legend('boxoff');
     end
@@ -101,13 +99,13 @@ end
 
 % High initial concentration of debris
 % Solve the ODE system
-[T,X_high] = ode15s(@fibroblastencaps,[t0 tf],x0_high,[],param);
+[T_high,X_high] = ode15s(@fibroblastencaps,[t0 tf],x0_high,[],param);
 
 % Plot the ODE solution
 figure;
 hold on
 for i=1:length(x0_high)
-    plot(T,X_high(:,i));
+    plot(T_high,X_high(:,i));
 end  
 xlabel('time');
 title('Change in concentrations over time (initial debris concentration is high')
@@ -116,20 +114,36 @@ hold off;
 % Individual Concentrations
 names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'], ['Macrophage 1'], ['Macrophage 2'], ['Fibroblast'], 'Drug1', 'Drug2'};
 options = {[0 0.4470 0.7410], [1 0 0], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560], [0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0.6350 0.0780 0.1840], [1 1 1], [1 1 1]};
-for i=1:length(x0_high)
-    if i < 7
-        figure
-        plot(T,X_high(:,i),'Color', options{i});
-        xlabel('time');
-        legend(names(i),'Location','SouthEast');    legend('boxoff');
-    end
+for i=1:length(x0_high)-2
+    figure
+    plot(T_high,X_high(:,i),'Color', options{i});
+    xlabel('time');
+    legend(names(i),'Location','SouthEast');    legend('boxoff');
 end
 
 %drug treatment
-param.TreatmentOption = 0;
-%[T, X_drug1] = ode15s % etc
+param.TreatmentOption = 1;
+[T_drug1,X_drug1] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
 
-% plot fibroblast as proxy for encapsulation
+param.TreatmentOption =2;
+[T_drug2,X_drug2] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
+
+param.TreatmentOption =3;
+[T_bothdrugs,X_bothdrugs] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
+
+figure
+hold on;
+plot(T_low,X_low(:,7))
+plot(T_drug1,X_drug1(:,7))
+plot(T_drug2,X_drug2(:,7))
+plot(T_bothdrugs,X_bothdrugs(:,7))
+legend('no treatment','c1 inhibition','c2 inhibition','inhibition of both c1 and c2');
+legend('boxoff');
+hold off;
+figure
+plot(T_drug1,X_drug1(:,8))
+title('drug1');
+
 
 %% functions
 function dx=fibroblastencaps(t,x,param)
@@ -140,15 +154,15 @@ function dx=fibroblastencaps(t,x,param)
     M1 = x(5);
     M2 = x(6);
     F = x(7);
+    drug1 = x(8);
+    drug2 = x(9);
     
-    param.Kdrug1 = 0;
-    param.Kdrug2 = 0;
-    
+    % setting drug effect parameters based on treatment option
+    param.Kdrug1 = 0; % effect of drug 1 on C1
+    param.Kdrug2 = 0; % effect of drug 2 on C2
     if param.TreatmentOption == 1
-        param.Kdrug1 = param.drug1; % effect of drug 1 on C1
-        param.Kdrug2 = 0; % effect of drug 2 on C2
-    elseif param.TreatmentOpion == 2
-        param.Kdrug1 = 0;
+        param.Kdrug1 = param.drug1; 
+    elseif param.TreatmentOption == 2
         param.Kdrug2 = param.drug2;
     elseif param.TreatmentOption == 3
         param.Kdrug1 = param.drug1;
@@ -158,19 +172,19 @@ function dx=fibroblastencaps(t,x,param)
      % add effect of drug 1 and 2 on C1 and C1,
      % either increase removal or decrease influence on michaelis menten rates for M1 and M2
     
-    ddrug1 = 0 %logistic - removal rate
-    ddrug2 = 0 %logistic - removal rate
+    ddrug1 =  - param.dDrug1*drug1; 
+    ddrug2 =  - param.dDrug2*drug2; 
     
     dD = -param.R*M2*D;
     m1 = mich_menten(param.vmax1, M0, param.km1); %michaelis-menten equation rate for transformation from M0 to M1
     m2 = mich_menten(param.vmax2, M0, param.km2); %michaelis-menten equation rate for transformation from M0 to M2
     dM0 = logistic_eq(D, param.Mmax, param.k0, M0) - C1*m1 - C2*m2 - param.dM0*M0; 
-    dC1 = param.kDc1*D + param.kM1*M1 - param.dc1*C1;
-    dC2 = param.kM2*M2 - param.dc2*C2;
+    dC1 = param.kDc1*D + param.kM1*M1 - param.dc1*C1  - param.Kdrug1*drug2*C1;
+    dC2 = param.kM2*M2 - param.dc2*C2 - param.Kdrug2*drug2*C2;
     dM1 = C1*m1 - param.dM1*M1;
     dM2 = C2*m2 - param.dM2*M2;
     h = hill_eq(param.hk, param.hn, M1, param.FMM);
-    dF = logistic_eq(param.kf, param.Fmax, F, F) + h*F - param.df*F;
+    dF = logistic_eq(param.kf, param.Fmax, F, F) + h*M1 - param.df*F;
     
     dx = [dD; dC1; dC2; dM0; dM1; dM2; dF; ddrug1; ddrug2];
 end
