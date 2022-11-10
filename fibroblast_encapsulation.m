@@ -102,7 +102,6 @@ legend('debris', 'cytokine 1', 'cytokine 2','macrophage 0','macrophage 1','macro
 hold off;
 %% functions
 function dx=fibroblastencaps(t,x,param)
-
     D = x(1);
     C1 = x(2);
     C2 = x(3);
@@ -112,19 +111,45 @@ function dx=fibroblastencaps(t,x,param)
     F = x(7);
     
     dD = -param.R*M2*D;
-    m1 = (param.vmax1*M0)/(param.km1 + M0); %michaelis-menten equation rate for transformation from M0 to M1
-    m2 = (param.vmax2*M0)/(param.km2 + M0); %michaelis-menten equation rate for transformation from M0 to M2
-    dM0 = D*param.k0*(1 -(M0/param.Mmax)) - C1*m1 - C2*m2 - param.dM0*M0; 
+    m1 = mich_menten(param.vmax1, M0, param.km1); %michaelis-menten equation rate for transformation from M0 to M1
+    m2 = mich_menten(param.vmax2, M0, param.km2); %michaelis-menten equation rate for transformation from M0 to M2
+    dM0 = logistic_eq(D, param.Mmax, param.k0, M0) - C1*m1 - C2*m2 - param.dM0*M0; 
     dC1 = param.kDc1*D + param.kM1*M1 - param.dc1*C1;
     dC2 = param.kM2*M2 - param.dc2*C2;
     dM1 = C1*m1 - param.dM1*M1;
     dM2 = C2*m2 - param.dM2*M2;
-    h = param.FMM*(M1^param.hn/(param.hk^param.hn + M1^param.hn)); %hill rate of fibroblast migration
-    dF = param.kf*F*(1-F/param.Fmax) + h - param.df*F;
+    h = hill_eq(param.hk, param.hn, M1, param.FMM);
+    dF = logistic_eq(param.kf, param.Fmax, F, F) + h - param.df*F;
     
     dx = [dD; dC1; dC2; dM0; dM1; dM2; dF];
 end
 
+
+function c =hill_eq(k,n,C,MR) % hill type function
+% INPUTS: 
+    % k - rate constant
+    % n - power 
+    % C - independent concentration
+    % MR - maximum rate
+    c = MR*C.^n./(k^n + C.^n);
+end
+
+function m = mich_menten(vmax, concent, km)
+% INPUTS: 
+    % vmax - maximum rate
+    % concent - substrate concentration
+    % km - MM constant
+    m = (vmax*concent)/(km + concent);
+end
+
+function l = logistic_eq(r, K, pop1, pop2)
+% INPUTS: 
+    % r - growth rate
+    % K - carrying capacity 
+    % pop1 - population 1
+    % pop1 - population 2
+    l = r*pop1*(1 -(pop2/K)); 
+end
 
 function c =hill_eq(k,n,C,MR) % hill type function
 % INPUTS: 
