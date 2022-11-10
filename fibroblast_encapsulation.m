@@ -21,6 +21,17 @@ param.kf= 0.01; %proliferation rate F
 param.Fmax= 2; %maximal F
 param.df= 0.2; %F apoptosis rate
 
+
+% antiinflammatory drug treatment option
+param.drug1 = 0.01; %arbitrary rates
+param.drug2 = 0.01;
+param.drug1_max = %something;
+param.drug2_max = %something;
+param.kdrug1 = %k for log growth; 
+param.kdrug2 = %k for log growth; 
+
+param.TreatmentOption = 0;
+
 % Hill-type parameter estimation
 M1_obs = [0; 0.1; 0.3; 0.5;1; 1.9; 3; 3.4; 5; 7.5; 8; 9; 12; 20];
 F_obs = [0; 3.04E-11; 7.45E-09; 9.54E-08; 3.01E-06; 7.55E-05; 0.000738; 0.001362; 0.008706; 0.042005; 0.0499; 0.064312; 0.088364; 0.098986];
@@ -58,9 +69,9 @@ hold off;
 t0 = 0; tf = 2000;  %(s)
 
 % Set the initial conditions (nondimensional)
-%         D; C1; C2; M0; M1; M2; F
-x0_low = [10; 0.1; 0.1; 1; 0; 0; 0]; 
-x0_high = [50; 0.1; 0.1; 1; 0; 0; 0]; 
+%         D; C1; C2; M0; M1; M2; F; drug1; drug2
+x0_low = [10; 0.1; 0.1; 1; 0; 0; 0; 0; 0]; 
+x0_high = [50; 0.1; 0.1; 1; 0; 0; 0; 0; 0]; 
 
 % Solve the ODE system
 [T,X_low] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
@@ -100,6 +111,13 @@ xlabel('time');
 title('Change in concentrations over time (initial debris concentration is high')
 legend('debris', 'cytokine 1', 'cytokine 2','macrophage 0','macrophage 1','macrophage 2','fibroblast','Location','SouthEast');    legend('boxoff');
 hold off;
+
+%drug treatment
+param.TreatmentOption = 1;
+[T, X_drug1] = ode15s % etc
+
+% plot fibroblast as proxy for encapsulation
+
 %% functions
 function dx=fibroblastencaps(t,x,param)
     D = x(1);
@@ -109,6 +127,26 @@ function dx=fibroblastencaps(t,x,param)
     M1 = x(5);
     M2 = x(6);
     F = x(7);
+    
+    param.Kdrug1 = 0;
+    param.Kdrug2 = 0;
+    
+    if param.TreatmentOption == 1
+        param.Kdrug1 = param.drug1; % effect of drug 1 on C1
+        param.Kdrug2 = 0; % effect of drug 2 on C2
+    elseif param.TreatmentOpion == 2
+        param.Kdrug1 = 0;
+        param.Kdrug2 = param.drug2;
+    elseif param.TreatmentOption == 3
+        param.Kdrug1 = param.drug1;
+        param.Kdrug2 = param.drug2;
+    end
+    
+     % add effect of drug 1 and 2 on C1 and C1,
+     % either increase removal or decrease influence on michaelis menten rates for M1 and M2
+    
+    ddrug1 = %logistic - removal rate
+    ddrug2 = %logistic - removal rate
     
     dD = -param.R*M2*D;
     m1 = mich_menten(param.vmax1, M0, param.km1); %michaelis-menten equation rate for transformation from M0 to M1
