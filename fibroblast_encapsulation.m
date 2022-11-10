@@ -150,12 +150,3 @@ function l = logistic_eq(r, K, pop1, pop2)
     % pop1 - population 2
     l = r*pop1*(1 -(pop2/K)); 
 end
-
-function c =hill_eq(k,n,C,MR) % hill type function
-% INPUTS: 
-    % k - rate constant
-    % n - power 
-    % C - independent concentration
-    % MR - maximum rate
-    c = MR*C.^n./(k^n + C.^n);
-end
