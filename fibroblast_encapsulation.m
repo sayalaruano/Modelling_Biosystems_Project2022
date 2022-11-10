@@ -89,10 +89,10 @@ hold off;
 
 % Individual concentrations
 names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'],['Macrophage 1'],['Macrophage 2'],['Fibroblast']};
-% options = {['-b'],['-r'],};
+options = {['-b'],['-r'], ['-y'], ['#7E2F8E'], ['-g'], ['-c'], ['-#A2142F']};
 for i=1:length(x0_low)
     figure
-    plot(T,X_low(:,i));
+    plot(T,X_low(:,i), options{i});
     xlabel('time');
     legend(names(i),'Location','SouthEast');    legend('boxoff');
 end  
@@ -159,7 +159,7 @@ function dx=fibroblastencaps(t,x,param)
     h = hill_eq(param.hk, param.hn, M1, param.FMM);
     dF = logistic_eq(param.kf, param.Fmax, F, F) + h*F - param.df*F;
     
-    dx = [dD; dC1; dC2; dM0; dM1; dM2; dF];
+    dx = [dD; dC1; dC2; dM0; dM1; dM2; dF; ddrug1; ddrug2];
 end
 
 
