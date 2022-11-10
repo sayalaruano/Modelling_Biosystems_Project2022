@@ -87,14 +87,16 @@ title('Change in concentrations over time (initial debris concentration is low')
 legend('debris', 'cytokine 1', 'cytokine 2','macrophage 0','macrophage 1','macrophage 2','fibroblast','Location','SouthEast');    legend('boxoff');
 hold off;
 
-% Individual concentrations
-names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'],['Macrophage 1'],['Macrophage 2'],['Fibroblast']};
-options = {['-b'],['-r'], ['-m'], ['-k'], ['-g'], ['-c'], ['-b']};
-for i=1:length(x0_low)-2 % -2 because we don't plot drug concentrations here
-    figure
-    plot(T,X_low(:,i), options{i});
-    xlabel('time');
-    legend(names(i),'Location','SouthEast');    legend('boxoff');
+% Individual Concentrations
+names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'], ['Macrophage 1'], ['Macrophage 2'], ['Fibroblast'], 'Drug1', 'Drug2'};
+options = {[0 0.4470 0.7410], [1 0 0], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560], [0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0.6350 0.0780 0.1840], [1 1 1], [1 1 1]};
+for i=1:length(x0_low)
+    if i < 7
+        figure
+        plot(T,X_low(:,i),'Color', options{i});
+        xlabel('time');
+        legend(names(i),'Location','SouthEast');    legend('boxoff');
+    end
 end  
 
 % High initial concentration of debris
@@ -111,10 +113,21 @@ xlabel('time');
 title('Change in concentrations over time (initial debris concentration is high')
 legend('debris', 'cytokine 1', 'cytokine 2','macrophage 0','macrophage 1','macrophage 2','fibroblast','Location','SouthEast');    legend('boxoff');
 hold off;
+% Individual Concentrations
+names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'], ['Macrophage 1'], ['Macrophage 2'], ['Fibroblast'], 'Drug1', 'Drug2'};
+options = {[0 0.4470 0.7410], [1 0 0], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560], [0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0.6350 0.0780 0.1840], [1 1 1], [1 1 1]};
+for i=1:length(x0_high)
+    if i < 7
+        figure
+        plot(T,X_high(:,i),'Color', options{i});
+        xlabel('time');
+        legend(names(i),'Location','SouthEast');    legend('boxoff');
+    end
+end
 
 %drug treatment
-param.TreatmentOption = 1;
-[T, X_drug1] = ode15s % etc
+param.TreatmentOption = 0;
+%[T, X_drug1] = ode15s % etc
 
 % plot fibroblast as proxy for encapsulation
 
