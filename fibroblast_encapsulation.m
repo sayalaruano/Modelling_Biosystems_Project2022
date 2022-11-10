@@ -24,11 +24,11 @@ param.df= 0.2; %F apoptosis rate
 
 % antiinflammatory drug treatment option
 param.drug1 = 0.01; %arbitrary rates
-param.drug2 = 0.01;
-param.drug1_max = %something;
-param.drug2_max = %something;
-param.kdrug1 = %k for log growth; 
-param.kdrug2 = %k for log growth; 
+param.drug2 = 0.01; 
+param.drug1_max = 2; %something;
+param.drug2_max = 2; %something;
+param.kdrug1 = 0.01; %k for log growth; 
+param.kdrug2 = 0.01; %k for log growth; 
 
 param.TreatmentOption = 0;
 
@@ -89,8 +89,8 @@ hold off;
 
 % Individual concentrations
 names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'],['Macrophage 1'],['Macrophage 2'],['Fibroblast']};
-options = {['-b'],['-r'], ['-y'], ['#7E2F8E'], ['-g'], ['-c'], ['-#A2142F']};
-for i=1:length(x0_low)
+options = {['-b'],['-r'], ['-m'], ['-k'], ['-g'], ['-c'], ['-b']};
+for i=1:length(x0_low)-2 % -2 because we don't plot drug concentrations here
     figure
     plot(T,X_low(:,i), options{i});
     xlabel('time');
@@ -145,8 +145,8 @@ function dx=fibroblastencaps(t,x,param)
      % add effect of drug 1 and 2 on C1 and C1,
      % either increase removal or decrease influence on michaelis menten rates for M1 and M2
     
-    ddrug1 = %logistic - removal rate
-    ddrug2 = %logistic - removal rate
+    ddrug1 = 0 %logistic - removal rate
+    ddrug2 = 0 %logistic - removal rate
     
     dD = -param.R*M2*D;
     m1 = mich_menten(param.vmax1, M0, param.km1); %michaelis-menten equation rate for transformation from M0 to M1
