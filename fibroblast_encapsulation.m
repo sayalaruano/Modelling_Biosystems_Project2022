@@ -157,7 +157,7 @@ function dx=fibroblastencaps(t,x,param)
     dM1 = C1*m1 - param.dM1*M1;
     dM2 = C2*m2 - param.dM2*M2;
     h = hill_eq(param.hk, param.hn, M1, param.FMM);
-    dF = logistic_eq(param.kf, param.Fmax, F, F) + h - param.df*F;
+    dF = logistic_eq(param.kf, param.Fmax, F, F) + h*F - param.df*F;
     
     dx = [dD; dC1; dC2; dM0; dM1; dM2; dF];
 end
