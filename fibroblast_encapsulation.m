@@ -1,4 +1,5 @@
-%% ODE Fibroblast Encapsulation Model 
+% ODE Fibroblast Encapsulation Model
+%% Definition of parameters
 clear all; close all;
 
 % Parameters
@@ -21,16 +22,14 @@ param.kf= 0.01; %proliferation rate F
 param.Fmax= 2; %maximal F
 param.df= 0.2; %F apoptosis rate
 
-
 % antiinflammatory drug treatment option
 param.drug1 = 0.01; %arbitrary rates
 param.drug2 = 0.01; 
 param.kdrug1 = 0.01; %k for log growth; 
 param.kdrug2 = 0.01; %k for log growth; 
-
 param.TreatmentOption = 0;
 
-% Hill-type parameter estimation
+%% Hill-type parameter estimation
 M1_obs = [0; 0.1; 0.3; 0.5;1; 1.9; 3; 3.4; 5; 7.5; 8; 9; 12; 20];
 F_obs = [0; 3.04E-11; 7.45E-09; 9.54E-08; 3.01E-06; 7.55E-05; 0.000738; 0.001362; 0.008706; 0.042005; 0.0499; 0.064312; 0.088364; 0.098986];
 param.FMM = max(F_obs); % maximum fibroblast migration rate
@@ -56,10 +55,10 @@ figure;
 hold on;
 plot(M1_obs, F_obs,'*');
 plot(X, hill_final);
-xlabel('[M1] (type 1 macrophage)')
-ylabel('[F] (fibroblast concentration)')
+xlabel('[M1] (Type 1 macrophage concentration)')
+ylabel('[F] (Fibroblast concentration)')
 hname = ['Fitted Hill Curve, k = ', num2str(param.hk), ', n = ',num2str(param.hn)];
-legend('Observations',hname,'Location','SouthEast')
+legend('Observations',hname,'Location','Northwest');
 hold off;
 
 %% ODE Simulation
@@ -71,6 +70,7 @@ t0 = 0; tf = 2000;  %(s)
 x0_low = [10; 0.1; 0.1; 1; 0; 0; 0; 0.2; 0.2]; 
 x0_high = [50; 0.1; 0.1; 1; 0; 0; 0; 0.2; 0.2]; 
 
+%% Low initial concentration of debris
 % Solve the ODE system
 [T_low,X_low] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
 
@@ -78,26 +78,32 @@ x0_high = [50; 0.1; 0.1; 1; 0; 0; 0; 0.2; 0.2];
 figure;
 hold on
 for i=1:length(x0_low)
-    plot(T_low,X_low(:,i));
+    plot(T_low,X_low(:,i), 'LineWidth', 1.05);
 end  
-xlabel('time');
-title('Change in concentrations over time (initial debris concentration is low')
-legend('debris', 'cytokine 1', 'cytokine 2','macrophage 0','macrophage 1','macrophage 2','fibroblast','Location','SouthEast');    legend('boxoff');
+xlabel('Time');
+ylabel('Concentration');
+%title('Change in concentrations over time (initial debris concentration is low')
+leg = legend('Debris', 'Cytokine 1', 'Cytokine 2','Macrophage 0','Macrophage 1','Macrophage 2','Fibroblast','Location','NorthEast');    
+title(leg,'Cell population');
+legend('boxoff');
 hold off;
 
 % Individual Concentrations
 names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'], ['Macrophage 1'], ['Macrophage 2'], ['Fibroblast'], 'Drug1', 'Drug2'};
 options = {[0 0.4470 0.7410], [1 0 0], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560], [0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0.6350 0.0780 0.1840], [1 1 1], [1 1 1]};
 for i=1:length(x0_low)
-    if i < 7
+    if i <= 7
         figure
-        plot(T_low,X_low(:,i),'Color', options{i});
-        xlabel('time');
-        legend(names(i),'Location','SouthEast');    legend('boxoff');
+        plot(T_low,X_low(:,i),'Color', options{i}, 'LineWidth', 1.05);
+        xlabel('Time');
+        ylabel('Concentration');
+        leg = legend(names(i),'Location','NorthEast');
+        title(leg,'Cell population');
+        legend('boxoff');
     end
 end  
 
-% High initial concentration of debris
+%% High initial concentration of debris
 % Solve the ODE system
 [T_high,X_high] = ode15s(@fibroblastencaps,[t0 tf],x0_high,[],param);
 
@@ -105,23 +111,29 @@ end
 figure;
 hold on
 for i=1:length(x0_high)
-    plot(T_high,X_high(:,i));
+    plot(T_high,X_high(:,i), 'LineWidth', 1.05);
 end  
-xlabel('time');
-title('Change in concentrations over time (initial debris concentration is high')
-legend('debris', 'cytokine 1', 'cytokine 2','macrophage 0','macrophage 1','macrophage 2','fibroblast','Location','SouthEast');    legend('boxoff');
+xlabel('Time');
+ylabel('Concentration');
+%title('Change in concentrations over time (initial debris concentration is high')
+leg = legend('Debris', 'Cytokine 1', 'Cytokine 2','Macrophage 0','Macrophage 1','Macrophage 2','Fibroblast','Location','NorthEast');    
+title(leg,'Cell population');  
+legend('boxoff');
 hold off;
 % Individual Concentrations
 names = {['Debris'], ['Cytokine 1'], ['Cytokine 2'], ['Macrophage 0'], ['Macrophage 1'], ['Macrophage 2'], ['Fibroblast'], 'Drug1', 'Drug2'};
 options = {[0 0.4470 0.7410], [1 0 0], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560], [0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0.6350 0.0780 0.1840], [1 1 1], [1 1 1]};
 for i=1:length(x0_high)-2
     figure
-    plot(T_high,X_high(:,i),'Color', options{i});
-    xlabel('time');
-    legend(names(i),'Location','SouthEast');    legend('boxoff');
+    plot(T_high,X_high(:,i),'Color', options{i}, 'LineWidth', 1.05);
+    xlabel('Time');
+    ylabel('Concentration');
+    leg = legend(names(i),'Location','NorthEast');
+    title(leg,'Cell population');   
+    legend('boxoff');
 end
 
-%drug treatment
+%% drug treatment
 param.TreatmentOption = 1;
 [T_drug1,X_drug1] = ode15s(@fibroblastencaps,[t0 tf],x0_low,[],param);
 
@@ -172,8 +184,8 @@ function dx=fibroblastencaps(t,x,param)
      % add effect of drug 1 and 2 on C1 and C1,
      % either increase removal or decrease influence on michaelis menten rates for M1 and M2
     
-    ddrug1 =  - param.dDrug1*drug1; 
-    ddrug2 =  - param.dDrug2*drug2; 
+    ddrug1 =  - param.drug1*drug1; 
+    ddrug2 =  - param.drug2*drug2; 
     
     dD = -param.R*M2*D;
     m1 = mich_menten(param.vmax1, M0, param.km1); %michaelis-menten equation rate for transformation from M0 to M1
