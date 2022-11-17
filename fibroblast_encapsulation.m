@@ -152,6 +152,8 @@ plot(T_bothdrugs,X_bothdrugs(:,7))
 legend('no treatment','c1 inhibition','c2 inhibition','inhibition of both c1 and c2');
 legend('boxoff');
 hold off;
+
+
 figure
 plot(T_drug1,X_drug1(:,8))
 title('drug1');
